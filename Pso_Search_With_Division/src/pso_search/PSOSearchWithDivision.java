@@ -13,7 +13,7 @@ import pso_search.IndividualTheoY;
 public class PSOSearchWithDivision extends Algothirm {
 	// So ca the cua quan the
 	public static final int SOCATHE = 50;
-	public static final int SOLANCHAY = 25;
+	public static final int SOLANCHAY = 10;
 
 	// So luong the he
 	public static final int SOTHEHE = 15;
@@ -45,6 +45,8 @@ public class PSOSearchWithDivision extends Algothirm {
 
 		for (int k = 0; k < SOCATHE; k++) {
 			ps[k] = new Individual(ob, ob.initNormal(ob.H * rand.nextDouble(), 0, ob.H, length), begin, finish, length);
+			
+//			ps[k] = new Individual(ob,ob.initHeuristic(ob.H * rand.nextDouble(),begin,finish,0,ob.H,length),begin,finish,length);
 //			System.out.printf("Ca the thu %d duoc khoi tao ", (k + 1)); // **//
 //			System.out.println("Mep = " + ps[k].getObjective(begin, finish, length));
 		}
@@ -52,12 +54,12 @@ public class PSOSearchWithDivision extends Algothirm {
 		return ps;
 	}
 
-	private int xacDinhIndexCaTheGbest(PbestClass[] Pbest) {
+	private int xacDinhIndexCaTheGbest(PbestClass[] Pbest,double toaDoDiemCuoiCuaDoanTruoc) {
 		// Tim Gbest
 		// Tim Gbest trong tat ca cac Pbest
 		int xacDinhCaTheGbest = 0;
 		for (int a = 1; a < SOCATHE; a++) {
-			if (Pbest[xacDinhCaTheGbest].Objective > Pbest[a].Objective) {
+			if (Pbest[xacDinhCaTheGbest].Objective > Pbest[a].Objective ||((Pbest[xacDinhCaTheGbest].Objective +5.0  > Pbest[a].Objective)&&(Math.abs(Pbest[xacDinhCaTheGbest].point[0].y-toaDoDiemCuoiCuaDoanTruoc) > Math.abs(Pbest[a].point[0].y-toaDoDiemCuoiCuaDoanTruoc)+10.0))) {
 				xacDinhCaTheGbest = a;
 			}
 		}
@@ -65,7 +67,7 @@ public class PSOSearchWithDivision extends Algothirm {
 	}
 
 	ArrayList<Point> luuViTriTimKiem = new ArrayList<>();
-	private void timKiemChoBatDauDiVao(int begin, int finish, int soToaDo) {
+	private double timKiemChoBatDauDiVao(int begin, int finish, int soToaDo,double toaDoDiemCuoiCuaDoanTruoc) {
 		// Tim tu vi tri x0 = 0 den x1200;
 		PbestClass GTimKiemChoBatDauDiVaoBest;
 		GTimKiemChoBatDauDiVaoBest = new PbestClass(soToaDo);
@@ -83,10 +85,10 @@ public class PSOSearchWithDivision extends Algothirm {
 			Pbest[i].point = population[i].Points();
 			Pbest[i].Objective = population[i].getObjective(begin, finish, soToaDo);
 		}
-		GTimKiemChoBatDauDiVaoBest = Pbest[xacDinhIndexCaTheGbest(Pbest)];
+		GTimKiemChoBatDauDiVaoBest = Pbest[xacDinhIndexCaTheGbest(Pbest,toaDoDiemCuoiCuaDoanTruoc)];
 		// int xacDinhPbestToiNhat = 0;
 		int theHe = 0;
-		double y_ti, y_t1i, v_t1i = 0, r1, r2;
+		double y_ti, y_t1i = 0, v_t1i = 0, r1, r2;
 		ArrayList<Double> vanToc = new ArrayList<>();
 
 		while (theHe < SOTHEHE && GTimKiemChoBatDauDiVaoBest.Objective > 0) {
@@ -105,7 +107,12 @@ public class PSOSearchWithDivision extends Algothirm {
 							+ C2 * r2 * (GTimKiemChoBatDauDiVaoBest.point[j].y - y_ti);
 					// }
 					vanToc.add(v_t1i);
-					y_t1i = y_ti + v_t1i;
+					if(y_ti + v_t1i>0 &&y_ti + v_t1i<ob.H){
+						y_t1i = y_ti + v_t1i;
+					}
+					else{
+						y_t1i = y_ti;
+					}
 					population[k].setGene(j, new Gene(population[k].getGene(j).x, y_t1i));
 				}
 
@@ -121,20 +128,20 @@ public class PSOSearchWithDivision extends Algothirm {
 				System.out.println("Pbest = " + Pbest[k].Objective);
 				System.out.println("---------------------------------------------------");
 			}
-			GTimKiemChoBatDauDiVaoBest = Pbest[xacDinhIndexCaTheGbest(Pbest)];
+			GTimKiemChoBatDauDiVaoBest = Pbest[xacDinhIndexCaTheGbest(Pbest,toaDoDiemCuoiCuaDoanTruoc)];
 		}
 		for (int i = 0; i < GTimKiemChoBatDauDiVaoBest.point.length; i++) {
 			luuViTriTimKiem.add(GTimKiemChoBatDauDiVaoBest.point[i]);
 		}
 		objectiveMin +=GTimKiemChoBatDauDiVaoBest.getObjective();
-
+		
 //		System.out.println("Xong tìm kiếm đầu vào");
 //		System.out.println("luuViTri.size() = " + luuViTriTimKiem.size());
 //		System.out.println("Kich thuoc doan gene la   " + GTimKiemChoBatDauDiVaoBest.point.length);
 		
 //		System.out.println("Diem dau la x = " + GTimKiemChoBatDauDiVaoBest.point[0].x + "  y = "+ GTimKiemChoBatDauDiVaoBest.point[0].y );
 //		System.out.println("Diem cuoi la x = " + GTimKiemChoBatDauDiVaoBest.point[GTimKiemChoBatDauDiVaoBest.point.length-1].x + "  y = "+ GTimKiemChoBatDauDiVaoBest.point[GTimKiemChoBatDauDiVaoBest.point.length-1].y );
-		
+		return GTimKiemChoBatDauDiVaoBest.point[GTimKiemChoBatDauDiVaoBest.point.length-1].y;
 	} 
 	//*****************************************************************//
 	//Tìm kiếm theo Y
@@ -154,8 +161,19 @@ public class PSOSearchWithDivision extends Algothirm {
 
 		return psY;
 	}
-
+	private int xacDinhIndexCaTheGbestTheoY(PbestClass[] Pbest) {
+		// Tim Gbest
+		// Tim Gbest trong tat ca cac Pbest
+		int xacDinhCaTheGbest = 0;
+		for (int a = 1; a < SOCATHE; a++) {
+			if (Pbest[xacDinhCaTheGbest].Objective > Pbest[a].Objective ) {
+				xacDinhCaTheGbest = a;
+			}
+		}
+		return xacDinhCaTheGbest;
+	}
 	private int timKiemTheoTrucY(Point beginTheoY,Point endTheoY){
+		
 		int beginY = (int) (beginTheoY.y/ob.dy);
 		int finishY = (int) (endTheoY.y/ob.dy);
 		int soToaDo = Math.abs(beginY-finishY);
@@ -167,6 +185,9 @@ public class PSOSearchWithDivision extends Algothirm {
 		else{
 			begin = finishY;
 			finish = beginY;
+		}
+		if(soToaDo ==0){
+			return 0;
 		}
 		System.out.println("Tim kiem theo y bat dau la " + begin + "  ket thuc la  " + finish+"   so toa do la "+soToaDo);
 		PbestClass GTimKiemChoBatDauDiVaoBest;
@@ -183,7 +204,7 @@ public class PSOSearchWithDivision extends Algothirm {
 			Pbest[i].point = populationTheoY[i].Points();
 			Pbest[i].Objective = populationTheoY[i].getObjective(begin, finish, soToaDo);
 		}
-		GTimKiemChoBatDauDiVaoBest = Pbest[xacDinhIndexCaTheGbest(Pbest)];
+		GTimKiemChoBatDauDiVaoBest = Pbest[xacDinhIndexCaTheGbestTheoY(Pbest)];
 		// int xacDinhPbestToiNhat = 0;
 		int theHe = 0;
 		double x_ti, x_t1i, v_t1i = 0, r1, r2;
@@ -203,22 +224,27 @@ public class PSOSearchWithDivision extends Algothirm {
 							+ C2 * r2 * (GTimKiemChoBatDauDiVaoBest.point[j].x - x_ti);
 					// }
 					vanToc.add(v_t1i);
-					x_t1i = x_ti + v_t1i;
+					if (x_ti + v_t1i<0 &&x_ti + v_t1i>ob.H){
+						x_t1i = x_ti + v_t1i;
+					}
+					else{
+						x_t1i = x_ti;
+					}
 					populationTheoY[k].setGene(j, new Gene(x_t1i,populationTheoY[k].getGene(j).y));
 				}
 				for (int m = 0; m < vanToc.size(); m++) {
 					populationTheoY[k].genes[m].v = vanToc.get(m);
 				}
 				vanToc.clear();
-				System.out.println("Tim kiem thep Y  Mep: " + populationTheoY[k].tinhHamMucTieuChoCaThe());
+//				System.out.println("Tim kiem thep Y  Mep: " + populationTheoY[k].tinhHamMucTieuChoCaThe());
 				if (Pbest[k].Objective > populationTheoY[k].getObjective(begin, finish, soToaDo)) {
 					Pbest[k].point = populationTheoY[k].Points();
 					Pbest[k].Objective = populationTheoY[k].getObjective(begin, finish, soToaDo);
 				}
-				System.out.println("Pbest = " + Pbest[k].Objective);
-				System.out.println("---------------------------------------------------");
+//				System.out.println("Pbest = " + Pbest[k].Objective);
+//				System.out.println("---------------------------------------------------");
 			}
-			GTimKiemChoBatDauDiVaoBest = Pbest[xacDinhIndexCaTheGbest(Pbest)];
+			GTimKiemChoBatDauDiVaoBest = Pbest[xacDinhIndexCaTheGbestTheoY(Pbest)];
 		}
 		if(beginY<finishY){
 			for (int i = 0; i < GTimKiemChoBatDauDiVaoBest.point.length; i++) {
@@ -244,8 +270,10 @@ public class PSOSearchWithDivision extends Algothirm {
 	public ArrayList<Point> RunAlgo() {
 		objectiveMin = 0;
 		 soLuongGeneTheoY = new int[5];
-		 timKiemChoBatDauDiVao(0, 1000, 1000);
-		 timKiemChoBatDauDiVao(1000, 2000, 1000);
+		 double diemBatDauDuongDi = ob.H * rand.nextDouble();
+		 double diemKetThucMotDuong;
+		 diemKetThucMotDuong = timKiemChoBatDauDiVao(0, 1000, 1000,diemBatDauDuongDi);
+		 diemKetThucMotDuong = timKiemChoBatDauDiVao(1000, 2000, 1000,diemKetThucMotDuong);
 		 
 		 //******************//
 		 System.out.println("+++++++++++++++++++++++++++++++++++++++++++++");
@@ -256,19 +284,19 @@ public class PSOSearchWithDivision extends Algothirm {
 		 Point endTheoY = luuViTriTimKiem.get(1000);
 		 soLuongGeneTheoY[0] = timKiemTheoTrucY(beginTheoY,endTheoY);
 		 //*******************//
-		 timKiemChoBatDauDiVao(2000, 3000, 1000);
+		 diemKetThucMotDuong = timKiemChoBatDauDiVao(2000, 3000, 1000,diemKetThucMotDuong);
 		 //*******************//
 		 beginTheoY = luuViTriTimKiem.get(1999);
 		 endTheoY = luuViTriTimKiem.get(2000);
 		 soLuongGeneTheoY[1] = timKiemTheoTrucY(beginTheoY,endTheoY);
 		 //*******************//
-		 timKiemChoBatDauDiVao(3000, 4000, 1000);
+		 diemKetThucMotDuong = timKiemChoBatDauDiVao(3000, 4000, 1000,diemKetThucMotDuong);
 		//*******************//
 		 beginTheoY = luuViTriTimKiem.get(2999);
 		 endTheoY = luuViTriTimKiem.get(3000);
 		 soLuongGeneTheoY[2] = timKiemTheoTrucY(beginTheoY,endTheoY);
 		 //*******************//
-		 timKiemChoBatDauDiVao(4000, 5000, 1000);
+		 diemKetThucMotDuong = timKiemChoBatDauDiVao(4000, 5000, 1000,diemKetThucMotDuong);
 		//*******************//
 		 beginTheoY = luuViTriTimKiem.get(3999);
 		 endTheoY = luuViTriTimKiem.get(4000);

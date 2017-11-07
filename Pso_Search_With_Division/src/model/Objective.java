@@ -113,23 +113,23 @@ public class Objective {
 //		}
 //		return ys;
 //	}
-    public double[] initHeuristic(double ys0) {
-		double[] ys = new double[xk.length];
-        ys[0] = ys0;
-		for (int i = 1; i < xk.length; i++) {
-            double min = Double.MAX_VALUE, min2 = Double.MAX_VALUE;
+    public double[] initHeuristic(double ys0,int begin,int end,double min, double max, int length) {
+		double[] ys = new double[length+1];		//tao đoạn gene có chiều dài là length
+        ys[0] = ys0;							//gán giá trị bắt đầu
+		for (int i = 1; i < length-1; i++) {		//xác định từng gene
+            double minip = Double.MAX_VALUE, min2 = Double.MAX_VALUE;
             int index = 0;
             int minp = (int)((ys[i - 1] - randMax) / dy);
             int maxp = (int)((ys[i - 1] + randMax) / dy);
-            if (minp < 0)
-                minp = 0;
-            if (maxp >= yk.length)
-                maxp = yk.length - 1;
+            if (minp < (int)(min/dy))
+                minp = (int)(max/dy)+1;
+            if (maxp >= (int)(max/dy))
+                maxp = (int)(max/dy)-1;
             for (int j = minp; j < maxp; j++) {
                 double dy = Math.abs(yk[j] - ys[i - 1]);
-                double v = getIP(xk[i], yk[j])*Math.abs(dx*dx+dy*dy);
-                if (v < min || (v == min && dy < min2)) {
-                    min = v;
+                double v = getIP(xk[begin+i], yk[j])*Math.abs(dx*dx+dy*dy);
+                if (v < minip || (v == minip && dy < min2)) {
+                    minip = v;
                     min2 = dy;
                     index = j;
                 }
@@ -138,5 +138,29 @@ public class Objective {
         }
 			return ys;
 	}
-
+    public double[] initHeuristicTheoY(double xs0,int begin,int end,double min, double max, int length) {
+		double[] xs = new double[yk.length];
+        xs[0] = xs0;
+		for (int i = 1; i < length; i++) {
+            double minip = Double.MAX_VALUE, min2 = Double.MAX_VALUE;
+            int index = 0;
+            int minp = (int)((xs[i - 1] - randMax) / dx);
+            int maxp = (int)((xs[i - 1] + randMax) / dx);
+            if (minp < (int)(min/dx))
+                minp = (int)(max/dx)+1;
+            if (maxp >= (int)(max/dx))
+                maxp = (int)(max/dx)-1;
+            for (int j = minp; j < maxp; j++) {
+                double dx = Math.abs(xk[j] - xs[i - 1]);
+                double v = getIP(xk[j], yk[begin+i])*Math.abs(dx*dx+dy*dy);
+                if (v < minip || (v == minip && dx < min2)) {
+                    minip = v;
+                    min2 = dx;
+                    index = j;
+                }
+            }
+            xs[i] = yk[index];
+        }
+			return xs;
+	}
 }
