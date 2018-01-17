@@ -19,7 +19,7 @@ public class PSOSearchWithDivision extends Algothirm {
 	public static final int SOTHEHE = 200;
 
 	// he so quan tinh w
-	public static final double W = 0.2;
+	public static final double W = 0.3;
 	// he so van toc theo maxGene
 	public static final double C1 = 0.5;
 	// he so van toc theo doi tuong lon nhat

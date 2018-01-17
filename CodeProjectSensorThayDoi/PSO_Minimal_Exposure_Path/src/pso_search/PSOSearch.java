@@ -12,11 +12,11 @@ import algorithm.Algothirm;
 
 public class PSOSearch extends Algothirm {
 	// So ca the cua quan the
-	public static final int POPNUM = 1;
-	public static final int SOLANCHAY = 1;
+	public static final int POPNUM = 200;
+	public static final int SOLANCHAY = 20;
 
 	// So luong the he
-	public static final int PSOINTER = 1;
+	public static final int PSOINTER = 200;
 	/*
 	// So ca the cua quan the
 	public static final int POPNUM = 100;
@@ -28,9 +28,9 @@ public class PSOSearch extends Algothirm {
 	// he so quan tinh w
 	public static final double W = 0.3;
 	// he so van toc theo maxGene
-	public static final double C1 = 0.2;
+	public static final double C1 = 0.5;
 	// he so van toc theo doi tuong lon nhat
-	public static final double C2 = 0.2;
+	public static final double C2 = 0.5;
 
 	public static final int SOTOADO = 5001;
 
